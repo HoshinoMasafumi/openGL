@@ -43,6 +43,54 @@ static GLdouble tai_z = 10;
 static GLdouble t = 0;
 static GLdouble dt = 0.1;
 
+void ball(double r);
+void leg(void);
+void display(void);
+void simu(void);
+void init(void);
+void reshape(int x, int y);
+void mouse(int button, int state, int x, int y);
+void keyboard(unsigned char key, int x, int y);
+
+
+int main(int argc, char *argv[])
+{
+
+    ball1.x = 0.0;
+    ball1.y = -45.0;
+
+    ball1.m = 100;
+
+    f_x = 100;
+    f_y = -ball1.m * G;
+    tai_z = 100;
+
+    //ball1.ddy = -9.8;
+    ball1.m = 100;
+
+    leg1.joint_x = -15;
+    leg1.joint_y = 0;
+
+    ball1.r = 5;
+    leg_ball.r = 3.536;
+
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize (400, 400);
+    glutInitWindowPosition(100,100);
+    glutCreateWindow(argv[0]);
+    init();
+    glutReshapeFunc(reshape);
+    glutKeyboardFunc(keyboard);
+    glutMouseFunc(mouse);
+    glutDisplayFunc(display);
+    //glutIdleFunc(bound);
+    glutIdleFunc(simu);
+    glutMainLoop();
+
+    return 0;
+}
+
 void ball(double r)
 {
     glBegin(GL_POLYGON);
@@ -103,7 +151,8 @@ void simu(void)
         ang = ang - 360.0;
     //glutPostRedisplay();//再描画
 
-    /*跳ね返りの条件*/
+    /*跳ね返り*/
+
     if (ball1.x >= 45){
         ball1.x = 45;
         ball1.dx = -ball1.dx;
@@ -125,11 +174,27 @@ void simu(void)
 
     glutPostRedisplay();
 
-    /*ボールの座標・速度・加速度*/
 
-    //ball1.ddx = f_x / ball1.m;
+    /*ボールの座標・速度・加速度*/
+    /*y軸*/
+
+    //ball1.ddy = f_y / ball1.m;
+    ball1.ddy = -G;
+    ball1.y = ball1.y + ball1.dy * dt + ball1.ddy * dt * dt / 2.0;
+    ball1.dy = ball1.dy + ball1.ddy * dt;
+
+    /*x軸*/
+
+    ball1.ddx = f_x / ball1.m;
+    ball1.x = ball1.x + ball1.dx * dt + ball1.ddx * dt * dt / 2.0;
+    ball1.dx = ball1.dx + ball1.ddx * dt;
+
+    /*
+       if(ball1.x > 0){
+
+       ball1.ddx = f_x / ball1.m;
     //ball1.ddy = -f_y / ball1.m;
-    ball1.ddx = 0;
+    //ball1.ddx = 0;
     ball1.ddy = -G;
     ball1.ddtht = tai_z / ball1.I;
 
@@ -144,13 +209,14 @@ void simu(void)
 
     t = t + dt;
 
+    }else if(ball1.x <= 0){
 
-/*
     ball1.ddx = f_x / ball1.m;
     ball1.x = ball1.x + ball1.dx * dt + ball1.ddx * dt * dt / 2.0;
     ball1.dx = ball1.dx + ball1.ddx * dt;
 
-    ball1.ddy = f_y / ball1.m;
+    //ball1.ddy = f_y / ball1.m;
+    ball1.ddy = -G;
     ball1.y = ball1.y + ball1.dy * dt + ball1.ddy * dt * dt / 2.0;
     ball1.dy = ball1.dy + ball1.ddy * dt;
 
@@ -159,12 +225,36 @@ void simu(void)
     ball1.dtht = ball1.dtht + ball1.ddtht * dt;
 
     t = t + dt;
-*/
-
+    }
+    */
     //printf("%f %f %f \n%f %f %f \n%f %f %f\n\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
 
 
     //glutPostRedisplay();
+
+    /*   if(count_2 == 0.0){
+         v = v0 - MG*count_1;
+         by1 = v0*count_1 - MG*count_1*count_1/2;
+         }else if(count_2 == -1.0){
+         by1 = -45;
+         }else{
+         v = v0 - MG*count_1;
+         by1 = v0*count_1 - MG*count_1*count_1/2 - 45;
+         }
+
+         if( by1 < -45 ){
+         by1 = -45;
+         v0 = -v*E;
+
+         if(count_1 <= count_up*4){
+         count_2 = -1.0;
+         }else{
+         count_1 = 0.0;
+         count_2++;
+         }
+
+         }
+         */
 
 }
 
@@ -231,37 +321,3 @@ void keyboard(unsigned char key, int x, int y)
         exit(0);
 }
 
-int main(int argc, char *argv[])
-{
-
-    ball1.m = 100;
-
-    f_x = 100;
-    f_y = -ball1.m * G;
-    tai_z = 100;
-
-    //ball1.ddy = -9.8;
-    ball1.m = 100;
-
-    leg1.joint_x = -15;
-    leg1.joint_y = 0;
-
-    ball1.r = 5;
-    leg_ball.r = 3.536;
-
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowSize (400, 400);
-    glutInitWindowPosition(100,100);
-    glutCreateWindow(argv[0]);
-    init();
-    glutReshapeFunc(reshape);
-    glutKeyboardFunc(keyboard);
-    glutMouseFunc(mouse);
-    glutDisplayFunc(display);
-    //glutIdleFunc(bound);
-    glutIdleFunc(simu);
-    glutMainLoop();
-
-    return 0;
-}
