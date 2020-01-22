@@ -157,6 +157,8 @@ void simu(void)
     ball1.ddtht = tai_z / ball1.I;
     ball1.tht = ball1.tht + ball1.dtht * dt + ball1.ddtht * dt * dt / 2.0;
     ball1.dtht = ball1.dtht + ball1.ddtht * dt;
+
+    t = t + dt;
 */
 
     //printf("%f %f %f \n%f %f %f \n%f %f %f\n\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
