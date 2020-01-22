@@ -59,14 +59,18 @@ int main(int argc, char *argv[])
     ball1.x = 0.0;
     ball1.y = -45.0;
 
+    ball1.dx = 10.0;
+    ball1.dy = 10.0;
+
+    ball1.ddx = 10.0;
+    ball1.ddy = 10.0;
+
     ball1.m = 100;
 
     f_x = 100;
     f_y = -ball1.m * G;
     tai_z = 100;
 
-    //ball1.ddy = -9.8;
-    ball1.m = 100;
 
     leg1.joint_x = -15;
     leg1.joint_y = 0;
@@ -140,7 +144,6 @@ void display(void)
     leg();
     glPopMatrix();
 
-
     glutSwapBuffers();
 }
 
@@ -172,7 +175,7 @@ void simu(void)
 
     printf("座標:%f %f %f \n速度:%f %f %f \n加速度:%f %f %f\n\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
 
-    glutPostRedisplay();
+    //glutPostRedisplay();
 
 
     /*ボールの座標・速度・加速度*/
@@ -189,72 +192,9 @@ void simu(void)
     ball1.x = ball1.x + ball1.dx * dt + ball1.ddx * dt * dt / 2.0;
     ball1.dx = ball1.dx + ball1.ddx * dt;
 
-    /*
-       if(ball1.x > 0){
-
-       ball1.ddx = f_x / ball1.m;
-    //ball1.ddy = -f_y / ball1.m;
-    //ball1.ddx = 0;
-    ball1.ddy = -G;
-    ball1.ddtht = tai_z / ball1.I;
-
-    ball1.x = ball1.x + ball1.dx * dt + ball1.ddx * dt * dt / 2.0;
-    ball1.y = ball1.y + ball1.dy * dt + ball1.ddy * dt * dt / 2.0;
-    ball1.tht = ball1.tht + ball1.dtht * dt + ball1.ddtht * dt * dt / 2.0;
-
-    ball1.dx = ball1.dx + ball1.ddx * dt;
-    //ball1.dx = 10;
-    ball1.dy = ball1.dy + ball1.ddy * dt;
-    ball1.dtht = ball1.dtht + ball1.ddtht * dt;
-
-    t = t + dt;
-
-    }else if(ball1.x <= 0){
-
-    ball1.ddx = f_x / ball1.m;
-    ball1.x = ball1.x + ball1.dx * dt + ball1.ddx * dt * dt / 2.0;
-    ball1.dx = ball1.dx + ball1.ddx * dt;
-
-    //ball1.ddy = f_y / ball1.m;
-    ball1.ddy = -G;
-    ball1.y = ball1.y + ball1.dy * dt + ball1.ddy * dt * dt / 2.0;
-    ball1.dy = ball1.dy + ball1.ddy * dt;
-
-    ball1.ddtht = tai_z / ball1.I;
-    ball1.tht = ball1.tht + ball1.dtht * dt + ball1.ddtht * dt * dt / 2.0;
-    ball1.dtht = ball1.dtht + ball1.ddtht * dt;
-
-    t = t + dt;
-    }
-    */
     //printf("%f %f %f \n%f %f %f \n%f %f %f\n\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
 
-
-    //glutPostRedisplay();
-
-    /*   if(count_2 == 0.0){
-         v = v0 - MG*count_1;
-         by1 = v0*count_1 - MG*count_1*count_1/2;
-         }else if(count_2 == -1.0){
-         by1 = -45;
-         }else{
-         v = v0 - MG*count_1;
-         by1 = v0*count_1 - MG*count_1*count_1/2 - 45;
-         }
-
-         if( by1 < -45 ){
-         by1 = -45;
-         v0 = -v*E;
-
-         if(count_1 <= count_up*4){
-         count_2 = -1.0;
-         }else{
-         count_1 = 0.0;
-         count_2++;
-         }
-
-         }
-         */
+    glutPostRedisplay();
 
 }
 
