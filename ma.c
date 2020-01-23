@@ -1,3 +1,10 @@
+/////////////////////////////////////////////////////////////////////
+//左クリックでキック開始
+//右クリックでキック終了
+//qで足の角度を-30度に戻す
+//escでシュミレーションの終了
+/////////////////////////////////////////////////////////////////////
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -6,10 +13,12 @@
 
 #define G 9.8
 #define E 0.70
-#define dt 0.1
+#define rfc 0.50
+#define dt 0.01
 
 int a;
-bool an = true;
+bool an = false;
+
 /*構造体の定義*/
 struct ball
 {
@@ -29,21 +38,25 @@ struct leg
     int id;
     double joint_x, joint_y, leg_tht;
     double leg_len, leg_wid;
+    double coord_x, coord_y;
 };
 
 struct leg leg1;
 
 /*初期値の設定*/
 
-static GLfloat ang = -60.0;
+static GLfloat ang = -30.0;
 static GLdouble i = 0.0;
-static GLdouble tai_z = 10;
-static GLdouble t = 0;
+static GLdouble tai_z = 10.0;
+static GLdouble t = 0.0;
 
 static GLdouble d_ball = 0.0;
 
 static GLdouble dist_x = 0.0;
 static GLdouble dist_y = 0.0;
+
+static GLdouble height = 100.0;
+static GLdouble width = 100.0;
 
 /*関数プロトタイプ*/
 
@@ -62,7 +75,7 @@ int main(int argc, char *argv[])
 {
 
     ball1.x = 0.0;
-    ball1.y = -45.0;
+    ball1.y = -95.0;
 
     ball1.dx = 0.0;
     ball1.dy = 0.0;
@@ -70,21 +83,21 @@ int main(int argc, char *argv[])
     ball1.ddx = 0.0;
     ball1.ddy = -G;
 
-    ball1.m = 10;
-    foot.m = 50;
+    ball1.m = 10.0;
+    foot.m = 50.0;
 
-    ball1.f_x = 10;
+    ball1.f_x = 10.0;
     ball1.f_y = -ball1.m * G;
 
-    tai_z = 100;
+    tai_z = 100.0;
 
-    leg1.joint_x = -15.0;
-    leg1.joint_y = 0.0;
+    leg1.joint_x = -10.0;
+    leg1.joint_y = -50.0;
 
     leg1.leg_len = 47.5;
     leg1.leg_wid = 5.0;
 
-    ball1.r = 5;
+    ball1.r = 5.0;
     foot.r = 3.536;
 
     glutInit(&argc, argv);
@@ -133,12 +146,19 @@ void leg(void)
     ball(foot.r);
     glPopMatrix();
 }
-
+/*
+   void leg(void)
+   {
+   glPushMatrix();
+   glTranslatef(5.0,-47.5,0.0);
+   ball(foot.r);
+   glPopMatrix();
+   }
+   */
 void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(0.5, 1.0, 0.0);
-
 
     glPushMatrix();
     glTranslatef(ball1.x, ball1.y, 0.0);//移動
@@ -158,123 +178,142 @@ void display(void)
 void simu(void)
 {
     if(an){
-        ang = ang + 2.5;
+        ang = ang + 0.5;
         if ( ang > 360.0 )
             ang = ang - 360.0;
-        //glutPostRedisplay();//再描画
+    }
+
+    /*ボールの座標・速度・加速度*/
+    /*y軸*/
+    if(ball1.y != -(height - ball1.r)){
+
+        ball1.ddy = ball1.f_y / ball1.m;
+        ball1.y = ball1.y + ball1.dy * dt + ball1.ddy * dt * dt / 2.0;
+        ball1.dy = ball1.dy + ball1.ddy * dt;
+
+    }else{
+    }
+
+    /*x軸*/
+
+    printf("\n\n%f\t%f\n\n", ball1.y, -(height - ball1.r));
+    if( ball1.y == -(height - ball1.r) ){
+
+        if(ball1.dx > 0){
+
+            ball1.ddx = rfc * ball1.f_y / ball1.m;
+            ball1.x = ball1.x + ball1.dx * dt + ball1.ddx * dt * dt / 2.0;
+            ball1.dx = ball1.dx + ball1.ddx * dt;
+        }else if (ball1.dx < 0){
+            ball1.ddx = -rfc * ball1.f_y / ball1.m;
+            ball1.x = ball1.x + ball1.dx * dt + ball1.ddx * dt * dt / 2.0;
+            ball1.dx = ball1.dx + ball1.ddx * dt;
+        }
+
+    }else{
+
+        ball1.x = ball1.x + ball1.dx * dt + ball1.ddx * dt * dt / 2.0;
+
     }
 
     /*跳ね返り*/
 
-    if (ball1.x >= 45){
-        ball1.x = 45;
+    if (ball1.x >= (width - ball1.r)){
+        ball1.x = width - ball1.r;
         ball1.dx = -ball1.dx;
-    }else if(ball1.x <= -45){
-        ball1.x = -45;
+    }else if(ball1.x <= -(width - ball1.r)){
+        ball1.x = -(width - ball1.r);
         ball1.dx = -ball1.dx;
     }
-    /*
-       if (ball1.y >= 45){
-       ball1.y = 45;
-       ball1.dy = -ball1.dy;
-       }else if(ball1.y <= -45){
-       ball1.dy = -ball1.dy * E;
-//f_y = f_y - E * ( ball1.r - ball1.y + 45);
-ball1.y = -45;
 
-if (ball1.dy < 1.5){
-ball1.dy = 0.0;
-}
+    if(ball1.y <= -(height - ball1.r)){
+        ball1.dy = -ball1.dy * E;
+        //f_y = f_y - E * ( ball1.r - ball1.y + 45);
+        ball1.y = -(height - ball1.r);
 
-}
-*/
-if(ball1.y <= -45){
-    ball1.dy = -ball1.dy * E;
-    //f_y = f_y - E * ( ball1.r - ball1.y + 45);
-    ball1.y = -45;
-
-    if (ball1.dy < 1.5){
-        ball1.dy = 0.0;
-    }
-}
-
-
-printf("座標\t:%f\t%f\t%f\n速度\t:%f\t%f\t%f\n加速度\t:%f\t%f\t%f\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
-
-//glutPostRedisplay();
-
-
-/*ボールの座標・速度・加速度*/
-/*y軸*/
-
-//ball1.ddy = ball1.f_y / ball1.m;
-ball1.y = ball1.y + ball1.dy * dt + ball1.ddy * dt * dt / 2.0;
-ball1.dy = ball1.dy + ball1.ddy * dt;
-
-/*x軸*/
-/*
-   ball1.ddx = ball1.f_x / ball1.m;
-   ball1.x = ball1.x + ball1.dx * dt + ball1.ddx * dt * dt / 2.0;
-   ball1.dx = ball1.dx + ball1.ddx * dt;
-   */
-
-ball1.x = ball1.x + ball1.dx * dt + ball1.ddx * dt * dt / 2.0;
-
-//glutPostRedisplay();
-
-/*ボールと足先の距離*/
-
-dist_x = ball1.x - (leg1.joint_x + leg1.leg_len * sin(ang * M_PI / 180.0) + leg1.leg_wid * cos(ang * M_PI / 180.0));
-dist_y = ball1.y - (leg1.joint_y - leg1.leg_len * cos(ang * M_PI / 180.0) - leg1.leg_wid * sin(ang * M_PI / 180.0));
-
-d_ball = sqrt((dist_x * dist_x) + (dist_y * dist_y));
-
-printf("距離\t:%f\nx差\t:%f\ny差\t:%f\n\n", d_ball, dist_x, dist_y);
-
-/*力積による速度設定*/
-//ball1.f_x = ball1.m * ball1.dx / dt;
-//ball1.f_y = ball1.m * ball1.dy / dt;
-
-/*
-   if(leg1.joint_x < ball1.x){
-   }else if(leg1.joint_x >= ball1.x){
-   }
-
-   if(leg1.joint_y < ball1.x){
-   }else if(leg1.joint_y >= ball1.y){
-   }
-   */
-
-/*ボールの当たり判定*/
-
-if(d_ball <= 8.0 && d_ball >= 5.0){
-
-    /*
-
-    if(leg1.joint_x < ball1.x){
-        ball1.dx = dist_x;
-    }else if(leg1.joint_x >= ball1.x){
-        ball1.dx = -dist_x;
+        if (ball1.dy < 0.2){
+            ball1.dy = 0.0;
+        }
     }
 
-    if(leg1.joint_y < ball1.x){
-        ball1.dy = dist_y;
-    }else if(leg1.joint_y >= ball1.y){
-        ball1.dy = dist_y;
+    printf("座標\t:%f\t%f\t%f\n速度\t:%f\t%f\t%f\n加速度\t:%f\t%f\t%f\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
+
+    /*ボールと足先の距離*/
+
+    leg1.coord_x = leg1.joint_x + leg1.leg_len * sin(ang * M_PI / 180.0) + leg1.leg_wid * cos(ang * M_PI / 180.0);
+    leg1.coord_y = leg1.joint_y - leg1.leg_len * cos(ang * M_PI / 180.0) - leg1.leg_wid * sin(ang * M_PI / 180.0);
+
+    dist_x = ball1.x - leg1.coord_x;
+    dist_y = ball1.y - leg1.coord_y;
+
+    dist_x = fabs(dist_x);
+    dist_y = fabs(dist_y);
+
+    d_ball = sqrt((dist_x * dist_x) + (dist_y * dist_y));
+
+    printf("足座標\t:%f\t%f\n", leg1.coord_x, leg1.coord_y);
+
+    printf("差xy\t:%f\t%f\n距離\t:%f\n\n", dist_x, dist_y, d_ball);
+
+    /*力積による速度設定*/
+    //ball1.f_x = ball1.m * ball1.dx / dt;
+    //ball1.f_y = ball1.m * ball1.dy / dt;
+
+    /*ボールの当たり判定*/
+
+    if ( (ball1.r + foot.r) >= ((dist_x * dist_x) + (dist_y * dist_y))){
+
+   // if(d_ball <= (ball1.r + foot.r) ){
+
+        if(leg1.joint_x <= ball1.x && leg1.joint_y <= ball1.y)//x+ y+ 右上
+        {
+            //ball1.dx = dist_x * ball1.f_y / d_ball;
+            //ball1.dy = dist_y * ball1.f_y / d_ball;
+            ball1.dx = dist_x;
+            ball1.dy = dist_y;
+
+            printf("x+ y+\n");
+
+        }else if(leg1.joint_x <= ball1.x && leg1.joint_y > ball1.y)//x+ y- 右下
+        {
+            //ball1.dx = dist_x * ball1.f_y / d_ball;
+            //ball1.dy = -dist_y * ball1.f_y / d_ball;
+            ball1.dx = dist_x;
+            ball1.dy = -dist_y;
+
+            printf("x+ y-\n");
+
+        }else if(leg1.joint_x > ball1.x && leg1.joint_y > ball1.y)//x- y- 左下
+        {
+            //ball1.dx = -dist_x * ball1.f_y / d_ball;
+            //ball1.dy = -dist_y * ball1.f_y / d_ball;
+            ball1.dx = -dist_x;
+            ball1.dy = -dist_y;
+
+            printf("x- y-\n");
+
+        }else if(leg1.joint_x > ball1.x && leg1.joint_y <= ball1.y)//x- y+ 左上
+        {
+            //ball1.dx = -dist_x * ball1.f_y / d_ball;
+            //ball1.dy = dist_y * ball1.f_y / d_ball;
+            ball1.dx = -dist_x;
+            ball1.dy = dist_y;
+
+            printf("x- y+\n");
+
+        }
+
+        ball1.dx = ball1.dx * 10;
+        ball1.dy = ball1.dy * 10;
+
+        printf("接触\t\n\n\n");
+
+        an = false;
+        //ang = -60.0;
+
     }
-*/
 
-    ball1.dx = dist_x * ball1.f_y / d_ball;
-    ball1.dy = dist_y * ball1.f_y / d_ball;
-
-
-    printf("\n\t接触\t\n\n\n");
-
-    an = false;
-
-}
-
-glutPostRedisplay();
+    glutPostRedisplay();
 
 }
 
@@ -296,7 +335,7 @@ void reshape(int w, int h)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     //glOrtho(-w, w, -h, h, -1.0, 1.0);
-    glOrtho(-50.0, 50.0, -50.0, 50.0, -1.0, 1.0);
+    glOrtho(-width, width, -height, height, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
@@ -316,7 +355,6 @@ void mouse(int button, int state, int x, int y)
                    glutPostRedisplay();
                    */
                 //ang = ang + 2.5;
-                ang = -60.0;
                 an = true;
             }
             break;
@@ -325,11 +363,13 @@ void mouse(int button, int state, int x, int y)
             break;
         case GLUT_RIGHT_BUTTON:
             printf("right");
-            /*
-               if( state == GLUT_DOWN ){
-               ang = ang + 2.5;
-               glutPostRedisplay();
-               }*/
+            if( state == GLUT_DOWN ){
+                /*
+                   ang = ang + 2.5;
+                   glutPostRedisplay();
+                   */
+                an = false;
+            }
             break;
         default:
             break;
@@ -355,5 +395,7 @@ void keyboard(unsigned char key, int x, int y)
 {
     if ( key == '\x1b')
         exit(0);
+    if ( key == 'q' )
+        ang = -30;
 }
 
