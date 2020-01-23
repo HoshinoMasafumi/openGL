@@ -146,15 +146,7 @@ void leg(void)
     ball(foot.r);
     glPopMatrix();
 }
-/*
-   void leg(void)
-   {
-   glPushMatrix();
-   glTranslatef(5.0,-47.5,0.0);
-   ball(foot.r);
-   glPopMatrix();
-   }
-   */
+
 void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -185,29 +177,31 @@ void simu(void)
 
     /*ボールの座標・速度・加速度*/
     /*y軸*/
-    if(ball1.y != -(height - ball1.r)){
 
-        ball1.ddy = ball1.f_y / ball1.m;
-        ball1.y = ball1.y + ball1.dy * dt + ball1.ddy * dt * dt / 2.0;
-        ball1.dy = ball1.dy + ball1.ddy * dt;
+    ball1.ddy = ball1.f_y / ball1.m;
+    ball1.y = ball1.y + ball1.dy * dt + ball1.ddy * dt * dt / 2.0;
+    ball1.dy = ball1.dy + ball1.ddy * dt;
 
-    }else{
-    }
+    printf("座標\t:%f\t%f\t%f\n速度\t:%f\t%f\t%f\n加速度\t:%f\t%f\t%f\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
 
     /*x軸*/
 
-    printf("\n\n%f\t%f\n\n", ball1.y, -(height - ball1.r));
-    if( ball1.y == -(height - ball1.r) ){
+    printf("\n\n%f\t%f\n\n", ball1.dy, ball1.ddy * dt);
+    //if( ball1.y == -(height - ball1.r) ){
+    if( ball1.dy == (ball1.ddy * dt) ){
 
         if(ball1.dx > 0){
 
             ball1.ddx = rfc * ball1.f_y / ball1.m;
             ball1.x = ball1.x + ball1.dx * dt + ball1.ddx * dt * dt / 2.0;
             ball1.dx = ball1.dx + ball1.ddx * dt;
+
         }else if (ball1.dx < 0){
+
             ball1.ddx = -rfc * ball1.f_y / ball1.m;
             ball1.x = ball1.x + ball1.dx * dt + ball1.ddx * dt * dt / 2.0;
             ball1.dx = ball1.dx + ball1.ddx * dt;
+
         }
 
     }else{
@@ -236,7 +230,7 @@ void simu(void)
         }
     }
 
-    printf("座標\t:%f\t%f\t%f\n速度\t:%f\t%f\t%f\n加速度\t:%f\t%f\t%f\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
+    //printf("座標\t:%f\t%f\t%f\n速度\t:%f\t%f\t%f\n加速度\t:%f\t%f\t%f\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
 
     /*ボールと足先の距離*/
 
@@ -263,7 +257,7 @@ void simu(void)
 
     if ( (ball1.r + foot.r) >= ((dist_x * dist_x) + (dist_y * dist_y))){
 
-   // if(d_ball <= (ball1.r + foot.r) ){
+        // if(d_ball <= (ball1.r + foot.r) ){
 
         if(leg1.joint_x <= ball1.x && leg1.joint_y <= ball1.y)//x+ y+ 右上
         {
@@ -315,87 +309,87 @@ void simu(void)
 
     glutPostRedisplay();
 
-}
-
-void idle(void)
-{
-    ang = ang + 2.5;
-    glutPostRedisplay();
-}
-
-void init(void)
-{
-    glClearColor(0, 0, 0, 0.0);
-    glShadeModel(GL_FLAT);
-}
-
-void reshape(int w, int h)
-{
-    glViewport( 0, 0, w, h );
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    //glOrtho(-w, w, -h, h, -1.0, 1.0);
-    glOrtho(-width, width, -height, height, -1.0, 1.0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-}
-
-void mouse(int button, int state, int x, int y)
-{
-    switch (button) {
-        case GLUT_LEFT_BUTTON:
-            if( state == GLUT_DOWN ){
-                /*
-                   glBegin(GL_POLYGON);
-                   glVertex2d(x - 5.0, y + 5.0);
-                   glVertex2d(x - 5.0, y - 45.0);
-                   glVertex2d(x + 45.0, y - 45.0);
-                   glVertex2d(x + 5.0, y + 5.0);
-                   glEnd();
-                   glutPostRedisplay();
-                   */
-                //ang = ang + 2.5;
-                an = true;
-            }
-            break;
-        case GLUT_MIDDLE_BUTTON:
-            printf("middle");
-            break;
-        case GLUT_RIGHT_BUTTON:
-            printf("right");
-            if( state == GLUT_DOWN ){
-                /*
-                   ang = ang + 2.5;
-                   glutPostRedisplay();
-                   */
-                an = false;
-            }
-            break;
-        default:
-            break;
     }
 
-    printf(" button is ");
-
-    switch (state) {
-        case GLUT_UP:
-            printf("up");
-            break;
-        case GLUT_DOWN:
-            printf("down");
-            break;
-        default:
-            break;
+    void idle(void)
+    {
+        ang = ang + 2.5;
+        glutPostRedisplay();
     }
 
-    printf(" at (%d, %d)\n", x, y);
-}
+    void init(void)
+    {
+        glClearColor(0, 0, 0, 0.0);
+        glShadeModel(GL_FLAT);
+    }
 
-void keyboard(unsigned char key, int x, int y)
-{
-    if ( key == '\x1b')
-        exit(0);
-    if ( key == 'q' )
-        ang = -30;
-}
+    void reshape(int w, int h)
+    {
+        glViewport( 0, 0, w, h );
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        //glOrtho(-w, w, -h, h, -1.0, 1.0);
+        glOrtho(-width, width, -height, height, -1.0, 1.0);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+    }
+
+    void mouse(int button, int state, int x, int y)
+    {
+        switch (button) {
+            case GLUT_LEFT_BUTTON:
+                if( state == GLUT_DOWN ){
+                    /*
+                       glBegin(GL_POLYGON);
+                       glVertex2d(x - 5.0, y + 5.0);
+                       glVertex2d(x - 5.0, y - 45.0);
+                       glVertex2d(x + 45.0, y - 45.0);
+                       glVertex2d(x + 5.0, y + 5.0);
+                       glEnd();
+                       glutPostRedisplay();
+                       */
+                    //ang = ang + 2.5;
+                    an = true;
+                }
+                break;
+            case GLUT_MIDDLE_BUTTON:
+                printf("middle");
+                break;
+            case GLUT_RIGHT_BUTTON:
+                printf("right");
+                if( state == GLUT_DOWN ){
+                    /*
+                       ang = ang + 2.5;
+                       glutPostRedisplay();
+                       */
+                    an = false;
+                }
+                break;
+            default:
+                break;
+        }
+
+        printf(" button is ");
+
+        switch (state) {
+            case GLUT_UP:
+                printf("up");
+                break;
+            case GLUT_DOWN:
+                printf("down");
+                break;
+            default:
+                break;
+        }
+
+        printf(" at (%d, %d)\n", x, y);
+    }
+
+    void keyboard(unsigned char key, int x, int y)
+    {
+        if ( key == '\x1b')
+            exit(0);
+        if ( key == 'q' )
+            ang = -30;
+    }
 
