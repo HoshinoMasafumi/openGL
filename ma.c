@@ -13,8 +13,8 @@
 
 #define G 9.8
 #define E 0.70
-#define rfc 0.50
-#define dt 0.01
+#define rfc 0.10
+#define dt 0.1
 
 int a;
 bool an = false;
@@ -182,7 +182,7 @@ void simu(void)
     ball1.y = ball1.y + ball1.dy * dt + ball1.ddy * dt * dt / 2.0;
     ball1.dy = ball1.dy + ball1.ddy * dt;
 
-    printf("座標\t:%f\t%f\t%f\n速度\t:%f\t%f\t%f\n加速度\t:%f\t%f\t%f\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
+    //printf("座標\t:%f\t%f\t%f\n速度\t:%f\t%f\t%f\n加速度\t:%f\t%f\t%f\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
 
     /*x軸*/
 
@@ -225,12 +225,16 @@ void simu(void)
         //f_y = f_y - E * ( ball1.r - ball1.y + 45);
         ball1.y = -(height - ball1.r);
 
-        if (ball1.dy < 0.2){
+        if (ball1.dy < 1.7){
             ball1.dy = 0.0;
         }
     }
 
-    //printf("座標\t:%f\t%f\t%f\n速度\t:%f\t%f\t%f\n加速度\t:%f\t%f\t%f\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
+    printf("座標\t:%f\t%f\t%f\n速度\t:%f\t%f\t%f\n加速度\t:%f\t%f\t%f\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
+
+    if ((-0.10 <=  ball1.dx) && (ball1.dx <= 0.10)){
+        ball1.dx = 0.0;
+    }
 
     /*ボールと足先の距離*/
 
@@ -255,7 +259,7 @@ void simu(void)
 
     /*ボールの当たり判定*/
 
-    if ( (ball1.r + foot.r) >= ((dist_x * dist_x) + (dist_y * dist_y))){
+    if ( ((ball1.r + foot.r) * (ball1.r + foot.r)) > ((dist_x * dist_x) + (dist_y * dist_y))){
 
         // if(d_ball <= (ball1.r + foot.r) ){
 
