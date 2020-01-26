@@ -1,8 +1,11 @@
 /////////////////////////////////////////////////////////////////////
-//左クリックでキック開始
-//右クリックでキック終了
+//sでキック開始
+//fでキック終了
 //qで足の角度を-30度に戻す
-//escでシュミレーションの終了
+//左クリックでその座標を保存
+//bでボールの位置を左クリックで保存した位置に移動
+//lで足の根本の位置を左クリックで保存した位置に移動
+//escでシュミレーションの終
 /////////////////////////////////////////////////////////////////////
 
 #include <stdio.h>
@@ -37,7 +40,7 @@ struct leg
 {
     int id;
     double joint_x, joint_y, leg_tht;
-    double leg_len, leg_wid;
+    double leg_hei, leg_wid, leg_len;
     double coord_x, coord_y;
 };
 
@@ -55,8 +58,11 @@ static GLdouble d_ball = 0.0;
 static GLdouble dist_x = 0.0;
 static GLdouble dist_y = 0.0;
 
-static GLdouble height = 100.0;
-static GLdouble width = 100.0;
+static GLdouble height = 200.0;
+static GLdouble width = 200.0;
+
+static GLdouble mouse_x = 0.0;
+static GLdouble mouse_y = 0.0;
 
 /*関数プロトタイプ*/
 
@@ -91,11 +97,12 @@ int main(int argc, char *argv[])
 
     tai_z = 100.0;
 
-    leg1.joint_x = -10.0;
+    leg1.joint_x = -15.0;
     leg1.joint_y = -50.0;
 
-    leg1.leg_len = 47.5;
+    leg1.leg_hei = 47.5;
     leg1.leg_wid = 5.0;
+    leg1.leg_len = 47.76243;
 
     ball1.r = 5.0;
     foot.r = 3.536;
@@ -186,7 +193,7 @@ void simu(void)
 
     /*x軸*/
 
-    printf("\n\n%f\t%f\n\n", ball1.dy, ball1.ddy * dt);
+    //printf("\n\n%f\t%f\n\n", ball1.dy, ball1.ddy * dt);
     //if( ball1.y == -(height - ball1.r) ){
     if( ball1.dy == (ball1.ddy * dt) ){
 
@@ -238,8 +245,11 @@ void simu(void)
 
     /*ボールと足先の距離*/
 
-    leg1.coord_x = leg1.joint_x + leg1.leg_len * sin(ang * M_PI / 180.0) + leg1.leg_wid * cos(ang * M_PI / 180.0);
-    leg1.coord_y = leg1.joint_y - leg1.leg_len * cos(ang * M_PI / 180.0) - leg1.leg_wid * sin(ang * M_PI / 180.0);
+    //leg1.coord_x = leg1.joint_x + leg1.leg_hei * sin(ang * M_PI / 180.0) + leg1.leg_wid * cos(ang * M_PI / 180.0);
+    //leg1.coord_y = leg1.joint_y - leg1.leg_hei * cos(ang * M_PI / 180.0) - leg1.leg_wid * sin(ang * M_PI / 180.0);
+
+    leg1.coord_x = leg1.joint_x + leg1.leg_len * sin((ang + 6.0) * M_PI / 180.0);
+    leg1.coord_y = leg1.joint_y - leg1.leg_len * cos((ang + 6.0)* M_PI / 180.0);
 
     dist_x = ball1.x - leg1.coord_x;
     dist_y = ball1.y - leg1.coord_y;
@@ -281,7 +291,7 @@ void simu(void)
 
             printf("x+ y-\n");
 
-        }else if(leg1.joint_x > ball1.x && leg1.joint_y > ball1.y)//x- y- 左下
+       }else if(leg1.joint_x > ball1.x && leg1.joint_y > ball1.y)//x- y- 左下
         {
             //ball1.dx = -dist_x * ball1.f_y / d_ball;
             //ball1.dy = -dist_y * ball1.f_y / d_ball;
@@ -306,7 +316,7 @@ void simu(void)
 
         printf("接触\t\n\n\n");
 
-        an = false;
+        //an = false;
         //ang = -60.0;
 
     }
@@ -343,17 +353,25 @@ void simu(void)
         switch (button) {
             case GLUT_LEFT_BUTTON:
                 if( state == GLUT_DOWN ){
-                    /*
-                       glBegin(GL_POLYGON);
-                       glVertex2d(x - 5.0, y + 5.0);
-                       glVertex2d(x - 5.0, y - 45.0);
-                       glVertex2d(x + 45.0, y - 45.0);
-                       glVertex2d(x + 5.0, y + 5.0);
-                       glEnd();
-                       glutPostRedisplay();
-                       */
-                    //ang = ang + 2.5;
-                    an = true;
+
+                    mouse_x = x;
+                    mouse_y = y;
+
+                    if ((mouse_x >= 0) && (mouse_x < 200) && (mouse_y >= 0) && (mouse_y < 200)){//x-,y+
+                        mouse_x = -(200 - mouse_x);
+                        mouse_y = 200 - mouse_y;
+                    }else if ((mouse_x >= 200) && (mouse_x <= 400) && (mouse_y >= 0) && (mouse_y < 200)){//x+,y+
+                        mouse_x = mouse_x - 200;
+                        mouse_y = 200 - mouse_y;
+                    }else if ((mouse_x >= 0) && (mouse_x < 200) && (mouse_y >= 200) && (mouse_y <= 400)){//x-,y-
+                        mouse_x = -(200 - mouse_x);
+                        mouse_y = -(mouse_y - 200);
+                    }else if ((mouse_x >= 200) && (mouse_x <= 400) && (mouse_y >= 200) && (mouse_y <= 400)){//x+,y-
+                        mouse_x = mouse_x - 200;
+                        mouse_y = -(mouse_y - 200);
+                    }
+
+                    //an = true;
                 }
                 break;
             case GLUT_MIDDLE_BUTTON:
@@ -366,7 +384,7 @@ void simu(void)
                        ang = ang + 2.5;
                        glutPostRedisplay();
                        */
-                    an = false;
+                    //an = false;
                 }
                 break;
             default:
@@ -395,5 +413,18 @@ void simu(void)
             exit(0);
         if ( key == 'q' )
             ang = -30;
+        if ( key == 's' )
+            an = true;
+        if ( key == 'f' )
+            an = false;
+        if ( key == 'b' ){
+            ball1.x = mouse_x;
+            ball1.y = mouse_y;
+        }
+        if ( key == 'l'){
+            leg1.joint_x = mouse_x;
+            leg1.joint_y = mouse_y;
+        }
+
     }
 
