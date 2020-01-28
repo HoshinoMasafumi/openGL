@@ -16,8 +16,25 @@
 
 #define G 9.8
 #define E 0.70
-#define rfc 0.10
+#define rfc 0.10//回転摩擦
 #define dt 0.1
+
+/*初期値の設定*/
+
+static GLfloat ang = -30.0;
+static GLdouble i = 0.0;
+static GLdouble t = 0.0;
+
+static GLdouble d_ball = 0.0;
+
+static GLdouble dist_x = 0.0;
+static GLdouble dist_y = 0.0;
+
+static GLdouble height = 200.0;
+static GLdouble width = 200.0;
+
+static GLdouble mouse_x = 0.0;
+static GLdouble mouse_y = 0.0;
 
 int a;
 bool an = false;
@@ -34,7 +51,27 @@ struct ball
     double f_x, f_y;/*加わる力*/
 };
 
-struct ball ball1, foot;
+struct ball ball1 =
+{
+    0,
+    5.0,
+    10,     0,
+    0.0,    0.0,  0.0,
+    0.0,    0.0,            0.0,
+    0.0,    -G,             0.0,
+    10.0,   0.0
+};
+
+struct ball foot =
+{
+    0,
+    3.536,
+    50.0,   0,
+    0.0,    0.0,    0.0,
+    0.0,    0.0,    0.0,
+    0.0,    0.0,    0.0,
+    0.0,    0.0,
+};
 
 struct leg
 {
@@ -44,25 +81,13 @@ struct leg
     double coord_x, coord_y;
 };
 
-struct leg leg1;
-
-/*初期値の設定*/
-
-static GLfloat ang = -30.0;
-static GLdouble i = 0.0;
-static GLdouble tai_z = 10.0;
-static GLdouble t = 0.0;
-
-static GLdouble d_ball = 0.0;
-
-static GLdouble dist_x = 0.0;
-static GLdouble dist_y = 0.0;
-
-static GLdouble height = 200.0;
-static GLdouble width = 200.0;
-
-static GLdouble mouse_x = 0.0;
-static GLdouble mouse_y = 0.0;
+struct leg leg1 =
+{
+    0,
+    -15.0,  -50.0,  0.0,
+    47.5,   5.0,    47.76243,
+    0.0,    0.0
+};
 
 /*関数プロトタイプ*/
 
@@ -80,32 +105,9 @@ void keyboard(unsigned char key, int x, int y);
 int main(int argc, char *argv[])
 {
 
-    ball1.x = 0.0;
-    ball1.y = -95.0;
+    ball1.y = -height - ball1.r;
 
-    ball1.dx = 0.0;
-    ball1.dy = 0.0;
-
-    ball1.ddx = 0.0;
-    ball1.ddy = -G;
-
-    ball1.m = 10.0;
-    foot.m = 50.0;
-
-    ball1.f_x = 10.0;
     ball1.f_y = -ball1.m * G;
-
-    tai_z = 100.0;
-
-    leg1.joint_x = -15.0;
-    leg1.joint_y = -50.0;
-
-    leg1.leg_hei = 47.5;
-    leg1.leg_wid = 5.0;
-    leg1.leg_len = 47.76243;
-
-    ball1.r = 5.0;
-    foot.r = 3.536;
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
@@ -117,7 +119,6 @@ int main(int argc, char *argv[])
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
     glutDisplayFunc(display);
-    //glutIdleFunc(bound);
     glutIdleFunc(simu);
     glutMainLoop();
 
@@ -161,7 +162,7 @@ void display(void)
 
     glPushMatrix();
     glTranslatef(ball1.x, ball1.y, 0.0);//移動
-    //glRotatef(ang, 0.0, 0.0, 1.0);//回転
+    glRotatef(ang, 0.0, 0.0, 1.0);//回転
     ball(ball1.r);
     glPopMatrix();
 
@@ -188,8 +189,6 @@ void simu(void)
     ball1.ddy = ball1.f_y / ball1.m;
     ball1.y = ball1.y + ball1.dy * dt + ball1.ddy * dt * dt / 2.0;
     ball1.dy = ball1.dy + ball1.ddy * dt;
-
-    //printf("座標\t:%f\t%f\t%f\n速度\t:%f\t%f\t%f\n加速度\t:%f\t%f\t%f\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
 
     /*x軸*/
 
@@ -218,6 +217,7 @@ void simu(void)
     }
 
     /*跳ね返り*/
+    /*x軸*/
 
     if (ball1.x >= (width - ball1.r)){
         ball1.x = width - ball1.r;
@@ -226,6 +226,8 @@ void simu(void)
         ball1.x = -(width - ball1.r);
         ball1.dx = -ball1.dx;
     }
+
+    /*y軸*/
 
     if(ball1.y <= -(height - ball1.r)){
         ball1.dy = -ball1.dy * E;
@@ -237,7 +239,7 @@ void simu(void)
         }
     }
 
-    printf("座標\t:%f\t%f\t%f\n速度\t:%f\t%f\t%f\n加速度\t:%f\t%f\t%f\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
+    //printf("座標\t:%f\t%f\t%f\n速度\t:%f\t%f\t%f\n加速度\t:%f\t%f\t%f\n", ball1.x, ball1.y, ball1.tht, ball1.dx, ball1.dy, ball1.dtht, ball1.ddx, ball1.ddy, ball1.ddtht);
 
     if ((-0.10 <=  ball1.dx) && (ball1.dx <= 0.10)){
         ball1.dx = 0.0;
@@ -259,9 +261,9 @@ void simu(void)
 
     d_ball = sqrt((dist_x * dist_x) + (dist_y * dist_y));
 
-    printf("足座標\t:%f\t%f\n", leg1.coord_x, leg1.coord_y);
+    //printf("足座標\t:%f\t%f\n", leg1.coord_x, leg1.coord_y);
 
-    printf("差xy\t:%f\t%f\n距離\t:%f\n\n", dist_x, dist_y, d_ball);
+    //printf("差xy\t:%f\t%f\n距離\t:%f\n\n", dist_x, dist_y, d_ball);
 
     /*力積による速度設定*/
     //ball1.f_x = ball1.m * ball1.dx / dt;
@@ -291,7 +293,7 @@ void simu(void)
 
             printf("x+ y-\n");
 
-       }else if(leg1.joint_x > ball1.x && leg1.joint_y > ball1.y)//x- y- 左下
+        }else if(leg1.joint_x > ball1.x && leg1.joint_y > ball1.y)//x- y- 左下
         {
             //ball1.dx = -dist_x * ball1.f_y / d_ball;
             //ball1.dy = -dist_y * ball1.f_y / d_ball;
@@ -314,11 +316,12 @@ void simu(void)
         ball1.dx = ball1.dx * 10;
         ball1.dy = ball1.dy * 10;
 
-        printf("接触\t\n\n\n");
+        //printf("接触\t\n\n\n");
 
-        //an = false;
+        an = false;
         //ang = -60.0;
 
+        printf("%f\n", 180 * atan(dist_y/dist_x) / M_PI);
     }
 
     glutPostRedisplay();
@@ -346,6 +349,7 @@ void simu(void)
         glOrtho(-width, width, -height, height, -1.0, 1.0);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+
     }
 
     void mouse(int button, int state, int x, int y)
